@@ -305,36 +305,7 @@
                     </div>
                 </div>
 
-                <!-- Feedback Category -->
-                <div class="form-section">
-                    <h3 class="section-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="8" y1="6" x2="21" y2="6"/>
-                            <line x1="8" y1="12" x2="21" y2="12"/>
-                            <line x1="8" y1="18" x2="21" y2="18"/>
-                            <line x1="3" y1="6" x2="3.01" y2="6"/>
-                            <line x1="3" y1="12" x2="3.01" y2="12"/>
-                            <line x1="3" y1="18" x2="3.01" y2="18"/>
-                        </svg>
-                        Feedback Category
-                    </h3>
-                    
-                    <div class="form-group">
-                        <label for="category">
-                            Select Category <span class="required">*</span>
-                        </label>
-                        <select id="category" required>
-                            <option value="">Choose a category</option>
-                            <option value="Teaching Quality">Teaching Quality</option>
-                            <option value="Course Content">Course Content</option>
-                            <option value="Teaching Methods">Teaching Methods</option>
-                            <option value="Lab Facilities">Lab Facilities</option>
-                            <option value="Study Materials">Study Materials</option>
-                            <option value="Assessment">Assessment & Evaluation</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                </div>
+
 
                 <!-- Feedback Text -->
                 <div class="form-section">
@@ -474,6 +445,35 @@
             }
         });
 
+        // Auto-tag category from questionnaire — picks the weakest area
+        function autoTagCategory() {
+            const scoreMap = { Excellent: 4, Good: 3, Average: 2, Poor: 1 };
+            const questions = [
+                { name: 'q1', category: 'Course Content' },
+                { name: 'q2', category: 'Teaching Methods' },
+                { name: 'q3', category: 'Study Materials' },
+                { name: 'q4', category: 'Teaching Quality' },
+                { name: 'q5', category: 'Assessment' },
+                { name: 'q6', category: 'Course Content' }
+            ];
+
+            let lowestScore = 5;
+            let lowestCategory = 'Teaching Quality';
+
+            questions.forEach(q => {
+                const checked = document.querySelector(`input[name="${q.name}"]:checked`);
+                if (checked) {
+                    const score = scoreMap[checked.value] || 3;
+                    if (score < lowestScore) {
+                        lowestScore = score;
+                        lowestCategory = q.category;
+                    }
+                }
+            });
+
+            return lowestCategory;
+        }
+
         // Form Submission
         document.getElementById('feedbackForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -493,7 +493,7 @@
                 subjectName: document.getElementById('subjectName').value,
                 facultyName: document.getElementById('facultyName').value,
                 rating: parseInt(ratingInput.value),
-                category: document.getElementById('category').value,
+                category: autoTagCategory(),
                 feedback: feedbackText.value,
                 questionnaire: {
                     q1: document.querySelector('input[name="q1"]:checked').value,
